@@ -13,7 +13,7 @@ Creator    = require '../src/creator'
 OptParse   = require 'optparse'
 PortNumber = parseInt(process.env.PORT) || 8080
 
-Adapters = ["irc", "campfire", "hipchat", "twilio", "xmpp"]
+Adapters = ["irc", "campfire", "hipchat", "twilio", "xmpp", "groupme"]
 Switches = [
   [ "-h", "--help",              "Display the help information"],
   [ "-a", "--adapter ADAPTER",   "The Adapter to use"],
@@ -84,7 +84,7 @@ else
   robot = Hubot.loadBot adapter, scriptsPath, Options.name
   robot.enableSlash = Options.enableSlash
 
-  scriptsPath = Path.resolve __dirname, "..", "src", "hubot", "scripts"
+  scriptsPath = Path.resolve "src", "hubot", "scripts"
   console.log "Loading hubot core scripts for relative scripts at #{scriptsPath}"
   robot.load scriptsPath
 
