@@ -24,11 +24,6 @@ class Gtalkbot extends Robot
     # Log options
     @options = options
     # console.log options
-	 
-    # send raw whitespace for keepalive
-    setInterval =>
-      @client.send ' '
-    , @options.keepaliveInterval
 
   error: (error) =>
     console.error error
