@@ -1,1 +1,1 @@
-app: bin/hubot -a xmpp -n nnabot
+app: bin/hubot -a gtalk -n nnabot
