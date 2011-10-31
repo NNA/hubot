@@ -22,8 +22,7 @@
     "node-xmpp": ">=0.2.6",
     "wobot": "0.3.0",
     "redis": "",
-    "jsdom": "",
-    "node-stringprep":""
+    "jsdom": ""
   },
   "main": "./index",
   "bin": {
