@@ -136,7 +136,7 @@ class XmppBot extends Robot
       console.log "from #{@options.username}, to #{to}"
 
       message = new Xmpp.Element('message',
-                  from: @options.username
+                  from: "#{user.room}/#{user.id}"#@options.username
                   to: to
                   type: user.type
                 ).

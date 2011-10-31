@@ -17,7 +17,7 @@ class Gtalkbot extends Robot
 
     # Events
     @client.on 'online', @.online
-    # @client.on 'chat', @.chat
+    @client.on 'chat', @.read
     @client.on 'stanza', @.read
     @client.on 'error', @.error
     
@@ -31,8 +31,12 @@ class Gtalkbot extends Robot
   online: =>
     console.log 'Hubot XMPP client online'
 
-    @client.send new Xmpp.Element('presence', type: 'unsubscribed' )
-      .c('show').t('chat')
+    # @client.send new Xmpp.Element('presence', type: 'subscribed' )
+    #   .c('show').t('chat')
+    @client.send new Xmpp.Element('presence')
+    # @client.send(new Xmpp.Element('message', {to: "nico.nardone@gmail.com", type: 'chat'} )
+    #   .c('body')
+    #   .t('test'))
 
     # join each room
     # http://xmpp.org/extensions/xep-0045.html for XMPP chat standard
@@ -147,12 +151,14 @@ class Gtalkbot extends Robot
     console.log 'send'
     for str in strings
       # console.log "Sending to #{user.room}: #{str}"
-      console.log "Sending to #{from}: #{str}"
+      # console.log "Sending to #{from}: #{str}"
 
       to = if user.type in ['direct', 'chat'] then "#{user.room}/#{user.id}" else user.room
+      # jid2 = new Xmpp.JID(node: @client.user, domain: @client.server, resource: @client.resource)
+      # from = jid2.toString()
 
       # console.log "from #{@options.username}, to #{to}"
-      console.log "from #{@options.jid}, to #{to}"
+      # console.log "from #{from}, to #{to}"
 
       # message = new Xmpp.Element('message',
       #             from: @options.username
@@ -160,14 +166,16 @@ class Gtalkbot extends Robot
       #             type: user.type
       #           ).
       #           c('body').t(str)
+      
       message = new Xmpp.Element('message',
-            from: from
-            to: to
-            type: user.type
-          ).
-          c('body').t(str)
-
+          # from: 'nna.done.bot@gmail.com',
+          { to: to,
+          type: user.type}
+        ).c('body').t(str)
+      
+      console.log 'before'
       @client.send message
+      console.log 'after'
 
   reply: (user, strings...) ->
     console.log 'reply'
