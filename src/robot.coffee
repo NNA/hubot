@@ -125,7 +125,7 @@ class Robot
     Fs.readFile path, "utf-8", (err, body) =>
       throw err if err
       for i, line of body.split("\n")
-        break    if line[0] != '#'
+        break    if !(line[0] == '#' or line.substr(0, 2) == '//')
         continue if !line.match('-')
         @commands.push line[2..line.length]
 
@@ -141,6 +141,12 @@ class Robot
   # user    - A Robot.User instance.
   # strings - One or more Strings for each reply to send.
   reply: (user, strings...) ->
+
+  # Public: Raw method for setting a topic on the chat source. Extend this.
+  #
+  # user    - A Robot.User instance
+  # strings - One more more Strings to set as the topic.
+  topic: (user, strings...) ->
 
   # Public: Raw method for invoking the bot to run
   # Extend this.
@@ -302,6 +308,15 @@ class Robot.Response
   # Returns nothing.
   send: (strings...) ->
     @robot.send @message.user, strings...
+
+  # Public: Posts a topic changing message
+  #
+  # strings - One or more strings to set as the topic of the 
+  #           room the bot is in.
+  #
+  # Returns nothing.
+  topic: (strings...) ->
+    @robot.topic @message.user, strings...
 
   # Public: Posts a message mentioning the current user.
   #
