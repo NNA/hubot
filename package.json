@@ -28,9 +28,6 @@
   "bin": {
     "hubot": "./bin/hubot"
   },
-  "engine": "node >= 0.4.1 < 0.5.0",
-  "devDependencies": {},
-  "engines": {
-    "node": "*"
-  }
+
+  "engine": "node >= 0.4.1 < 0.5.0"
 }
