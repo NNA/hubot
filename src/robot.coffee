@@ -10,7 +10,6 @@ class Robot
   # path - String directory full of Hubot scripts to load.
   constructor: (path, name = "Hubot") ->
     @name        = name
-    @getName     = -> name
     @brain       = new Robot.Brain
     @commands    = []
     @Response    = Robot.Response
@@ -49,9 +48,9 @@ class Robot
 
     pattern = re.join("/") # combine the pattern back again
     if @enableSlash
-      newRegex = new RegExp("^(?:\/|#{@name}:?)\\s*#{pattern}", modifiers)
+      newRegex = new RegExp("^(?:\/|#{@name}:?)\\s*(?:#{pattern})", modifiers)
     else
-      newRegex = new RegExp("^#{@name}:?\\s*#{pattern}", modifiers)
+      newRegex = new RegExp("^#{@name}:?\\s*(?:#{pattern})", modifiers)
 
     console.log newRegex.toString()
     @listeners.push new TextListener(@, newRegex, callback)
@@ -221,7 +220,7 @@ class Robot.Brain extends EventEmitter
   mergeData: (data) ->
     for k of (data or { })
       @data[k] = data[k]
-      
+
     @emit 'loaded', @data
 
 class Robot.Message
@@ -311,7 +310,7 @@ class Robot.Response
 
   # Public: Posts a topic changing message
   #
-  # strings - One or more strings to set as the topic of the 
+  # strings - One or more strings to set as the topic of the
   #           room the bot is in.
   #
   # Returns nothing.
