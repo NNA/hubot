@@ -1,7 +1,7 @@
 Robot = require "../robot"
 Irc   = require "irc"
 
-class IrcBot extends Robot
+class IrcBot extends Robot.Adapter
   send: (user, strings...) ->
     for str in strings
       if user.room
@@ -28,22 +28,24 @@ class IrcBot extends Robot
     self = @
 
     options =
-      nick:     process.env.HUBOT_IRC_NICK or @name
+      nick:     process.env.HUBOT_IRC_NICK or @robot.name
       port:     process.env.HUBOT_IRC_PORT
       rooms:    process.env.HUBOT_IRC_ROOMS.split(",")
       server:   process.env.HUBOT_IRC_SERVER
       password: process.env.HUBOT_IRC_PASSWORD
       nickpass: process.env.HUBOT_IRC_NICKSERV_PASSWORD
+      fakessl:  process.env.HUBOT_IRC_SERVER_FAKE_SSL or false
+      unflood:  process.env.HUBOT_IRC_UNFLOOD or false
+      debug:    process.env.HUBOT_IRC_DEBUG or false
 
-    console.log options
-
-    client_options = {
-          password: options.password,
-          debug: true,
-          port: options.port,
-          stripColors: true,
-          secure: if options.port is "6697" then true else false,
-        }
+    client_options =
+      password: options.password,
+      debug: options.debug,
+      port: options.port,
+      stripColors: true,
+      secure: if options.port is "6697" then true else false,
+      selfSigned: options.fakessl,
+      floodProtection: options.unflood
 
     unless options.nickpass
         client_options['channels'] = options.rooms
