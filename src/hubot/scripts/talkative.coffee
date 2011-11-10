@@ -1,12 +1,7 @@
 # Respond to custom answers
 # - say something about <topic> - will say something he knows about the subject 
 # - when asked <regexp_of_question> answer <response> - teach your bot to answer to <regexp_of_question> with <response> 
-# - forget answers - remove every teached answer from brain bot
-#
-# TODO :
-# * FEATURE: Only users with roles = TEACHER_ROLE can teach something to the bot 
-# * FEATURE: Display possible questions in help
-# * FEATURE: Add context to match questions (the same question can have two meanings depending on context)
+# - forget answers - remove every teached answer from bot brain
 
 module.exports = (robot) ->  
   
@@ -59,7 +54,6 @@ module.exports = (robot) ->
       msg.send "OK, I will answer \"#{answer}\" when asked \"#{question}\""
   
   robot.respond /(forget)( all)? (answers|replies|everything)$/i, (msg) ->
-    #iterate through robot.listeners and remove knowledge questions 
     for key, item of robot.brain.data.knowledge 
       i = 0
       while i < robot.listeners.length
