@@ -25,7 +25,8 @@
     "imap": "0.2.5",
     "flowdock": "0.2.x",
     "redis": "",
-    "jsdom": ""
+    "jsdom": "",
+    "node-stringprep": ""
   },
   "main": "./index",
   "bin": {
