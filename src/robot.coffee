@@ -15,7 +15,7 @@ class Robot
     @Response    = Robot.Response
     @listeners   = []
     @loadPaths   = []
-    @enableSlash = false
+    @alias       = false
 
     Adapter = require "#{adapterPath}/#{adapter}"
     @adapter = new Adapter @
@@ -48,8 +48,9 @@ class Robot
       console.log "WARNING: The regex in question was #{regex.toString()}\n"
 
     pattern = re.join("/") # combine the pattern back again
-    if @enableSlash
-      newRegex = new RegExp("^(?:\/|#{@name}[:,]?)\\s*(?:#{pattern})", modifiers)
+    if @alias
+      alias = @alias.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") # escape alias for regexp
+      newRegex = new RegExp("^(?:#{alias}|#{@name}[:,]?)\\s*(?:#{pattern})", modifiers)
     else
       newRegex = new RegExp("^#{@name}[:,]?\\s*(?:#{pattern})", modifiers)
 
@@ -150,9 +151,29 @@ class Robot
         result = @brain.data.users[k]
     result
 
-  # Public: Run Hubot using the loaded adapter.
+  # Public: Get all users whose names match fuzzyName. Currently, match
+  # means 'starts with', but this could be extended to match initials,
+  # nicknames, etc.
   #
-  # Returns nothing.
+  usersForRawFuzzyName: (fuzzyName) ->
+    lowerFuzzyName = fuzzyName.toLowerCase()
+    user for key, user of (@brain.data.users or {}) when (
+         user.name.toLowerCase().lastIndexOf(lowerFuzzyName, 0) == 0)
+      
+  # Public: If fuzzyName is an exact match for a user, returns an array with
+  # just that user. Otherwise, returns an array of all users for which
+  # fuzzyName is a raw fuzzy match (see usersForRawFuzzyName).
+  #
+  usersForFuzzyName: (fuzzyName) ->
+    matchedUsers = @usersForRawFuzzyName(fuzzyName)
+    lowerFuzzyName = fuzzyName.toLowerCase()
+    # We can scan matchedUsers rather than all users since usersForRawFuzzyName
+    # will include exact matches
+    for user in matchedUsers
+      return [user] if user.name.toLowerCase() is lowerFuzzyName
+          
+    matchedUsers
+
   run: ->
     @adapter.run()
 
@@ -210,6 +231,19 @@ class Robot.Adapter
   userForName: (name) ->
     @robot.userForName name
 
+  # Public: Get all users whose names match fuzzyName. Currently, match
+  # means 'starts with', but this could be extended to match initials,
+  # nicknames, etc.
+  #
+  usersForRawFuzzyName: (fuzzyName) ->
+    @robot.usersForRawFuzzyName fuzzyName
+
+  # Public: If fuzzyName is an exact match for a user, returns an array with
+  # just that user. Otherwise, returns an array of all users for which
+  # fuzzyName is a raw fuzzy match (see usersForRawFuzzyName).
+  #
+  usersForFuzzyName: (fuzzyName) ->
+    @robot.usersForFuzzyName fuzzyName
 
   # Public: Creates a scoped http client with chainable methods for
   # modifying the request.  This doesn't actually make a request though.
@@ -241,6 +275,7 @@ class Robot.Adapter
   # Returns a ScopedClient instance.
   http: (url) ->
     @httpClient.create(url)
+
 
 class Robot.User
   # Represents a participating user in the chat.

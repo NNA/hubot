@@ -1,7 +1,7 @@
 Robot = require '../robot'
 Xmpp = require 'node-xmpp'
 
-class Gtalkbot extends Robot
+class Gtalkbot extends Robot.Adapter
   run: ->
     Xmpp.JID.prototype.from = -> @bare().toString()
 
