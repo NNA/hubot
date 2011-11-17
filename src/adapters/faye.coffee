@@ -22,8 +22,8 @@ class Faye extends Robot.Adapter
     @options = options
 
     @client.subscribe '/chat/*', (message) =>
-      console.log 'Faye Adapter got message from ' + message.user + ' saying '+ message.message
-      @receive new Robot.TextMessage message.user, message.message
+      console.log 'Faye Adapter got message from ' + message.username + ' saying '+ message.message
+      @receive new Robot.TextMessage message.username, message.message
   
   send: (user, strings...) =>
     for str in strings
@@ -33,7 +33,7 @@ class Faye extends Robot.Adapter
       else
         console.log "@#{user.name} #{str}"
         @client.publish '/chat/paris',
-          user:     @robot.name,
+          username:     @robot.name,
           message:  str
 
   reply: (user, strings...) ->
