@@ -1,1 +1,1 @@
-app: bin/hubot -a gtalk -n nnabot
+app: bin/hubot -a faye -n nnabot
