@@ -1,8 +1,9 @@
-Robot        = require "../robot"
+Robot        = require('hubot').robot()
+
 HTTPS        = require "https"
 Wobot        = require("wobot").Bot
 
-class HipChat extends Robot
+class HipChat extends Robot.Adapter
   send: (user, strings...) ->
     for str in strings
       @bot.message user.reply_to, str
@@ -124,5 +125,6 @@ class HipChat extends Robot
       console.log err.stack
       callback err
 
-module.exports = HipChat
+exports.use = (robot) ->
+  new HipChat robot
 

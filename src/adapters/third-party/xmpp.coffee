@@ -1,4 +1,5 @@
-Robot = require '../robot'
+Robot = require('hubot').robot()
+
 Xmpp  = require 'node-xmpp'
 
 class XmppBot extends Robot.Adapter
@@ -88,6 +89,9 @@ class XmppBot extends Robot.Adapter
       message = body.getText()
 
       [room, from] = stanza.attrs.from.split '/'
+      
+      # ignore our own messages in rooms
+      return if from == @robot.username
 
       # note that 'from' isn't a full JID, just the local user part
       user = @userForId from
@@ -177,5 +181,6 @@ class XmppBot extends Robot.Adapter
 
     @client.send message
 
-module.exports = XmppBot
+exports.use = (robot) ->
+  new XmppBot robot
 

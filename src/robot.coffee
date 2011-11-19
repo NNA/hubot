@@ -11,14 +11,15 @@ class Robot
   constructor: (adapterPath, adapter, name = "Hubot") ->
     @name        = name
     @brain       = new Robot.Brain
+    @alias       = false
+    @adapter     = null
     @commands    = []
     @Response    = Robot.Response
     @listeners   = []
     @loadPaths   = []
-    @alias       = false
+    @enableSlash = false
 
-    Adapter = require "#{adapterPath}/#{adapter}"
-    @adapter = new Adapter @
+    @loadAdapter adapterPath, adapter if adapter?
 
   # Public: Adds a Listener that attempts to match incoming messages based on
   # a Regex.
@@ -110,10 +111,26 @@ class Robot
       require(full) @
       @parseHelp "#{path}/#{file}"
 
+  # Load the adapter Hubot is going to use.
+  #
+  # path    - A String of the path to adapter if local.
+  # adapter - A String of the adapter name to use.
+  #
+  # Returns nothing.
+  loadAdapter: (path, adapter) ->
+    try
+      path = if adapter in [ "campfire", "shell" ]
+        "#{path}/#{adapter}"
+      else
+        "hubot-#{adapter}"
+
+      @adapter = require("#{path}").use(@)
+    catch err
+      console.log "Can't load adapter '#{adapter}', try installing the package"
+
   # Public: Help Commands for Running Scripts
   #
   # Returns an array of help commands for running scripts
-  #
   helpCommands: () ->
     @commands.sort()
 
