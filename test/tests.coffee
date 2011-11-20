@@ -1,6 +1,8 @@
-Robot = require '../src/robot'
-Path  = require 'path'
-Url   = require 'url'
+Robot   = require '../src/robot'
+Adapter = require '../src/adapter'
+User    = require '../src/user'
+Path    = require 'path'
+Url     = require 'url'
 
 # A programmer's best friend.
 # http://timenerdworld.files.wordpress.com/2010/12/joint-venture-s1e3_1.jpg
@@ -42,7 +44,7 @@ class Helper extends Robot
   stop: ->
     process.exit 0
 
-class Danger extends Robot.Adapter
+class Danger extends Adapter
   send: (user, strings...) ->
     @robot.sent.push str for str in strings
     @cb? strings...
@@ -51,7 +53,7 @@ class Danger extends Robot.Adapter
     @send user, "#{@robot.name}: #{str}" for str in strings
 
   receive: (text) ->
-    user = new Robot.User 1, 'helper'
+    user = new User 1, 'helper'
     super new Robot.TextMessage user, text
 
 if not process.env.HUBOT_LIVE

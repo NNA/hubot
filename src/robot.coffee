@@ -1,7 +1,9 @@
 Fs           = require 'fs'
 Url          = require 'url'
 Path         = require 'path'
-EventEmitter = require('events').EventEmitter
+
+Brain        = require './brain'
+User         = require './user'
 
 class Robot
   # Robots receive messages from a chat source (Campfire, irc, etc), and
@@ -10,7 +12,7 @@ class Robot
   # path - String directory full of Hubot scripts to load.
   constructor: (adapterPath, adapter, name = "Hubot") ->
     @name        = name
-    @brain       = new Robot.Brain
+    @brain       = new Brain
     @alias       = false
     @adapter     = null
     @commands    = []
@@ -158,7 +160,7 @@ class Robot
   userForId: (id, options) ->
     user = @brain.data.users[id]
     unless user
-      user = new Robot.User id, options
+      user = new User id, options
       @brain.data.users[id] = user
     user
 
@@ -197,172 +199,16 @@ class Robot
   run: ->
     @adapter.run()
 
-class Robot.Adapter
-  # An adapter is a specific interface to a chat source for robots.
-  #
-  # robot - A Robot instance.
-  constructor: (@robot) ->
-
-  # Public: Raw method for sending data back to the chat source.  Extend this.
-  #
-  # user    - A Robot.User instance.
-  # strings - One or more Strings for each message to send.
-  send: (user, strings...) ->
-
-  # Public: Raw method for building a reply and sending it back to the chat
-  # source. Extend this.
-  #
-  # user    - A Robot.User instance.
-  # strings - One or more Strings for each reply to send.
-  reply: (user, strings...) ->
-
-  # Public: Raw method for setting a topic on the chat source. Extend this.
-  #
-  # user    - A Robot.User instance
-  # strings - One more more Strings to set as the topic.
-  topic: (user, strings...) ->
-
-  # Public: Raw method for invoking the bot to run
-  # Extend this.
-  run: ->
-
-  # Public: Raw method for shutting the bot down.
-  # Extend this.
-  close: ->
-    @robot.brain.close()
-
-  # Public: Dispatch a received message to the robot.
-  #
-  # message - A TextMessage instance of the received message.
-  #
-  # Returns nothing.
-  receive: (message) ->
-    @robot.receive message
-
-  # Public: Get an Array of User objects stored in the brain.
-  users: ->
-    @robot.users
-
-  # Public: Get a User object given a unique identifier
-  userForId: (id, options) ->
-    @robot.userForId id, options
-
-  # Public: Get a User object given a name
-  userForName: (name) ->
-    @robot.userForName name
-
-  # Public: Get all users whose names match fuzzyName. Currently, match
-  # means 'starts with', but this could be extended to match initials,
-  # nicknames, etc.
-  #
-  usersForRawFuzzyName: (fuzzyName) ->
-    @robot.usersForRawFuzzyName fuzzyName
-
-  # Public: If fuzzyName is an exact match for a user, returns an array with
-  # just that user. Otherwise, returns an array of all users for which
-  # fuzzyName is a raw fuzzy match (see usersForRawFuzzyName).
-  #
-  usersForFuzzyName: (fuzzyName) ->
-    @robot.usersForFuzzyName fuzzyName
-
-  # Public: Creates a scoped http client with chainable methods for
-  # modifying the request.  This doesn't actually make a request though.
-  # Once your request is assembled, you can call `get()`/`post()`/etc to
-  # send the request.
-  #
-  # url - String URL to access.
-  #
-  # Examples:
-  #
-  #     res.http("http://example.com")
-  #       # set a single header
-  #       .header('Authorization', 'bearer abcdef')
-  #
-  #       # set multiple headers
-  #       .headers(Authorization: 'bearer abcdef', Accept: 'application/json')
-  #
-  #       # add URI query parameters
-  #       .query(a: 1, b: 'foo & bar')
-  #
-  #       # make the actual request
-  #       .get() (err, res, body) ->
-  #         console.log body
-  #
-  #       # or, you can POST data
-  #       .post(data) (err, res, body) ->
-  #         console.log body
-  #
-  # Returns a ScopedClient instance.
-  http: (url) ->
-    @httpClient.create(url)
-
-
-class Robot.User
-  # Represents a participating user in the chat.
-  #
-  # id      - A unique ID for the user.
-  # options - An optional Hash of key, value pairs for this user.
-  constructor: (@id, options = { }) ->
-    for k of (options or { })
-      @[k] = options[k]
-
-# http://www.the-isb.com/images/Nextwave-Aaron01.jpg
-class Robot.Brain extends EventEmitter
-  # Represents somewhat persistent storage for the robot.
-  #
-  # Returns a new Brain with no external storage.  Extend this!
-  constructor: () ->
-    @data =
-      users: { }
-
-    @resetSaveInterval 5
-
-  # Emits the 'save' event so that 'brain' scripts can handle persisting.
-  #
-  # Returns nothing.
-  save: ->
-    @emit 'save', @data
-
-  # Emits the 'close' event so that 'brain' scripts can handle closing.
-  #
-  # Returns nothing.
-  close: ->
-    clearInterval @saveInterval
-    @save()
-    @emit 'close'
-
-  # Reset the interval between save function calls.
-  #
-  # seconds - An Integer of seconds between saves.
-  #
-  # Returns nothing.
-  resetSaveInterval: (seconds) ->
-    clearInterval @saveInterval if @saveInterval
-    @saveInterval = setInterval =>
-      @save()
-    , seconds * 1000
-
-  # Merge keys loaded from a DB against the in memory representation
-  #
-  # Returns nothing
-  #
-  # Caveats: Deeply nested structures don't merge well
-  mergeData: (data) ->
-    for k of (data or { })
-      @data[k] = data[k]
-
-    @emit 'loaded', @data
-
 class Robot.Message
   # Represents an incoming message from the chat.
   #
-  # user - A Robot.User instance that sent the message.
+  # user - A User instance that sent the message.
   constructor: (@user) ->
 
 class Robot.TextMessage extends Robot.Message
   # Represents an incoming message from the chat.
   #
-  # user - A Robot.User instance that sent the message.
+  # user - A User instance that sent the message.
   # text - The String message contents.
   constructor: (@user, @text) ->
     super @user
@@ -377,12 +223,12 @@ class Robot.TextMessage extends Robot.Message
 
 # Represents an incoming user entrance notification.
 #
-# user - A Robot.User instance for the user who entered.
+# user - A User instance for the user who entered.
 class Robot.EnterMessage extends Robot.Message
 
 # Represents an incoming user exit notification.
 #
-# user - A Robot.User instance for the user who left.
+# user - A User instance for the user who left.
 class Robot.LeaveMessage extends Robot.Message
 
 class Listener
@@ -498,6 +344,6 @@ class Robot.Response
 HttpClient = require 'scoped-http-client'
 
 Robot.Response::httpClient = HttpClient
-Robot::httpClient = HttpClient
 
 module.exports = Robot
+
