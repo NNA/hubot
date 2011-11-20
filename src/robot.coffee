@@ -119,13 +119,16 @@ class Robot
   # Returns nothing.
   loadAdapter: (path, adapter) ->
     try
+      console.log("-----------------#{path}/#{adapter}") 
       path = if adapter in [ "campfire", "shell" ]
         "#{path}/#{adapter}"
       else
+        console.log "choix num 2"
         "hubot-#{adapter}"
 
       @adapter = require("#{path}").use(@)
     catch err
+      console.log "---------------------- err "+err.stack
       console.log "Can't load adapter '#{adapter}', try installing the package"
 
   # Public: Help Commands for Running Scripts
