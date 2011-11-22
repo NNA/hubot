@@ -42,8 +42,8 @@ class Faye extends Robot.Adapter
         console.log "#{user.room} #{str}"
         # @client.publish('/chat/nicolas'
       else
-        console.log "@#{user.name} #{str}"
-        @client.publish '/chat/nicolas',
+        console.log "@#{user.name} #{str}" # need to retrieve the room
+        @client.publish '/chat/paris',
           username:     @robot.name,
           message:      str
 
