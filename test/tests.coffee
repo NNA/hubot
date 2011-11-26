@@ -1,6 +1,8 @@
-Robot = require '../src/robot'
-Path  = require 'path'
-Url   = require 'url'
+Robot   = require '../src/robot'
+Adapter = require '../src/adapter'
+User    = require '../src/user'
+Path    = require 'path'
+Url     = require 'url'
 
 # A programmer's best friend.
 # http://timenerdworld.files.wordpress.com/2010/12/joint-venture-s1e3_1.jpg
@@ -27,16 +29,35 @@ exports.danger = (helper, cb) ->
       cb()
 
   server.on 'close', -> helper.close()
-
   server
 
 class Helper extends Robot
   constructor: (scriptPath) ->
-    adapterPath = Path.resolve "test"
-    super adapterPath, 'danger_adapter', 'helper'
+    super null, null, 'helper'
     @load scriptPath
-    @sent = []
+
     @Response = Helper.Response
+    @sent = []
+
+    @adapter = new Danger @
+
+  stop: ->
+    process.exit 0
+
+  reset: ->
+    @sent = []
+
+class Danger extends Adapter
+  send: (user, strings...) ->
+    @robot.sent.push str for str in strings
+    @cb? strings...
+
+  reply: (user, strings...) ->
+    @send user, "#{@robot.name}: #{str}" for str in strings
+
+  receive: (text) ->
+    user = new User 1, 'helper'
+    super new Robot.TextMessage user, text
 
 if not process.env.HUBOT_LIVE
   class Helper.Response extends Robot.Response

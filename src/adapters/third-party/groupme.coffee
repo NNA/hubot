@@ -1,9 +1,11 @@
-Robot = require 'robot'
-HTTP  = require 'http'
-HTTPS = require 'https'
-URL   = require 'url'
+Robot   = require('hubot').robot()
+Adapter = require('hubot').adapter()
 
-class GroupMe extends Robot
+HTTP    = require 'http'
+HTTPS   = require 'https'
+URL     = require 'url'
+
+class GroupMe extends Adapter
   send: (user, strings...) ->
     strings.forEach (str) =>
       if str.match(/(png|jpg)$/i)
@@ -117,5 +119,6 @@ class GroupMe extends Robot
           cb(json.response.messages.reverse())
     request.end()
 
-exports.GroupMe = GroupMe
+exports.use = (robot) ->
+  new GroupMe robot
 

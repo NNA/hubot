@@ -1,7 +1,9 @@
-Robot = require '../robot'
-Xmpp  = require 'node-xmpp'
+Robot   = require('hubot').robot()
+Adapter = require('hubot').adapter()
 
-class XmppBot extends Robot.Adapter
+Xmpp    = require 'node-xmpp'
+
+class XmppBot extends Adapter
   run: ->
     options =
       username: process.env.HUBOT_XMPP_USERNAME
@@ -88,6 +90,9 @@ class XmppBot extends Robot.Adapter
       message = body.getText()
 
       [room, from] = stanza.attrs.from.split '/'
+      
+      # ignore our own messages in rooms
+      return if from == @robot.username
 
       # note that 'from' isn't a full JID, just the local user part
       user = @userForId from
@@ -177,5 +182,6 @@ class XmppBot extends Robot.Adapter
 
     @client.send message
 
-module.exports = XmppBot
+exports.use = (robot) ->
+  new XmppBot robot
 
