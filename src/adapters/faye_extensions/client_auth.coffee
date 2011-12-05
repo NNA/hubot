@@ -11,6 +11,9 @@ clientAuth = outgoing: (message, callback) ->
 
       #Set the auth token
       message.ext.group = message.channel
+      message.ext.user_id = '0';
+      message.ext.user_name = process.env.HUBOT_FAYE_USER;
+      message.ext.avatar = process.env.HUBOT_FAYE_AVATAR;
       password = process.env.HUBOT_FAYE_PASSWORD
 
       sha1.update "#{password}/chat/#{message.ext.group}"
